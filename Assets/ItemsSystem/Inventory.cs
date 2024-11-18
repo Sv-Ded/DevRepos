@@ -1,57 +1,79 @@
 ﻿
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class Inventory : IBaseInventory
 {
-    public  Cell[] Cells { get; private set; }
+    private int _freeCellsCount;
+
+    public PeackablItem[] Items { get; private set; }
+
+    public event Action<PeackablItem> ItemAdded;
 
     public Inventory(int cellsCount)
     {
-        Cells = GetCells(cellsCount);
+        Items = new PeackablItem[cellsCount];
+        _freeCellsCount = cellsCount;
     }
 
     public bool Add(PeackablItem item)
     {
-        //if (_freeCells > item.ItemInfo.CellsCount && _freeCells > 0)
-        //{
-        //    _items.Add(item);
-        //    _freeCells -= item.ItemInfo.CellsCount;
-        //    item.OnPeacked();
+        if (_freeCellsCount >= item.ItemInfo.CellsCount)
+        {
+            TakePlace(item);
 
-        //    return true;
-        //}
+            _freeCellsCount -= item.ItemInfo.CellsCount;
 
-        //Debug.Log("Недостаточно клеток");
-        return false;
+            ItemAdded?.Invoke(item);
+
+            return true;
+        }
+        else
+        {
+            Debug.Log("Недостаточно клеток");
+            return false;
+        }
     }
 
-    public bool Remove(PeackablItem item)
+    public bool Remove(PeackablItem peackedItem)
     {
-        //if (_items.Remove(item))
-        //{
-        //    item.OnDropped();
-        //    _freeCells += item.ItemInfo.CellsCount;
-        //    return true;
-        //}
+        try
+        {
+            foreach (var cell in Items)
+            {
+                if (cell == peackedItem)
+                {
+                    ClearCell(cell);
+                }
+            }
 
-        Debug.Log("Нет предмета");
-        return false;
+            _freeCellsCount += peackedItem.ItemInfo.CellsCount;
+        }
+        catch
+        {
+            return false;
+        }
+
+        return true;
     }
 
     #region services
 
-    private Cell[] GetCells(int size)
+    private void TakePlace(PeackablItem item)
     {
-        Cell[] cells = new Cell[size];
-
-        for (int i = 0; i < cells.Length; i++)
+        for (int i = 0, j = 0; i < item.ItemInfo.CellsCount; j++)
         {
-            cells[i] = new Cell();
-        }
+            if (Items[j] == null)
+            {
+                i++;
 
-        return cells;
+                Items[j] = item;
+            }
+        }
     }
+
+    private void ClearCell(PeackablItem item) => item = null;
 
     #endregion
 }

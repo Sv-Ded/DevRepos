@@ -1,19 +1,31 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
-public class Cell
+public class Cell : MonoBehaviour
 {
-    public bool IsTaken { get; private set; }
-    public PeackablItem Item { get; private set; }
+    [SerializeField] private Text _text;
+    private string _defaultText = "";
 
-    public Cell()
+    private Sprite _defaultSprite;
+    private Image _itemIcon;
+
+    private bool _isTaken = false;
+    private PeackablItem _item = null;
+
+    private RectTransform _rectTransform;
+
+    private void Awake()
     {
-        IsTaken = false;
-        Item = null;
+        _text = GetComponent<Text>();
+
+        _itemIcon = GetComponent<Image>();
     }
+    
+    public void Init(Vector3 position, Vector2 scale)
+    {
+         _rectTransform = GetComponent<RectTransform>();
 
-    public void SetItem(PeackablItem item)=> Item = item;
-
-    public void RemoveItem()=>Item = null;
+        _rectTransform.localPosition = position;
+        _rectTransform.sizeDelta = scale;
+    }
 }
